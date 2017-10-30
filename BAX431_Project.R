@@ -1,4 +1,5 @@
 library(ggplot2)
+library(grid)
 movie <- read.csv("movie.csv")
 
 # Does higher rating movie also have a higher adjusted gross revenue?
@@ -10,7 +11,14 @@ boxplot(movie_1$Adjusted_Gross2, horizontal = TRUE) # use boxplot to understand 
 outliers <- boxplot(movie_1$Adjusted_Gross2, horizontal = TRUE)$out # identify outliers
 outliers_index <- match(outliers, movie_1$Adjusted_Gross2) # find index of outliers
 movie_1_no_outliers <- movie_1[-outliers_index,] # re-create a movie dataset without outliers
+# Compute correlation coefficient
+cor(as.numeric(movie_1$IMDb_Rating), movie_1$Adjusted_Gross2) # correlation coefficient of IMDb_Rating
+cor(as.numeric(movie_1$MovieLens_Rating), movie_1$Adjusted_Gross2) # correlation coefficient of MovieLens_Rating
 # graph
+grob_IMDb <- grobTree(textGrob("Correlation Coefficient(IMDb) = 0.272", x=0.05,  y=0.90, hjust=0,
+                          gp=gpar(col="#CC79A7", fontsize=12, fontface="italic")))
+grob_MovieLens <- grobTree(textGrob("Correlation Coefficient(MovieLens) = 0.226", x=0.05,  y=0.85, hjust=0,
+                          gp=gpar(col="#56B4E9", fontsize=12, fontface="italic")))
 ggplot(movie_1_no_outliers, aes(y=Adjusted_Gross2))+
   geom_point(color="#CC79A7", aes(x=as.numeric(IMDb_Rating), shape="IMDb"))+
   geom_smooth(se=FALSE, method=lm, color="#CC79A7", aes(x=as.numeric(IMDb_Rating)))+
@@ -21,10 +29,9 @@ ggplot(movie_1_no_outliers, aes(y=Adjusted_Gross2))+
   scale_y_continuous(breaks = seq(0,1200,200))+
   labs(x="Rating", y="Adjusted Gross Revenue")+
   ggtitle("Adj. Gross Revenue VS. Rating")+
-  theme(plot.title = element_text(hjust=0.5, face="bold"))
-# Compute correlation coefficient to comfirm result
-cor(as.numeric(movie_1$IMDb_Rating), movie_1$Adjusted_Gross2) # correlation coefficient of IMDb_Rating
-cor(as.numeric(movie_1$MovieLens_Rating), movie_1$Adjusted_Gross2) # correlation coefficient of MovieLens_Rating
+  theme(plot.title = element_text(hjust=0.5, face="bold"))+
+  annotation_custom(grob_IMDb)+
+  annotation_custom(grob_MovieLens)
 
 
 
@@ -37,15 +44,18 @@ boxplot(movie_2$Profit2, horizontal = TRUE) # use boxplot to understand the data
 outliers_2 <- boxplot(movie_2$Profit2, horizontal = TRUE)$out # identify outliers
 outliers_index_2 <- match(outliers_2, movie_2$Profit2) # find index of outliers
 movie_2_no_outliers <- movie_2[-outliers_index_2,] # re-create a movie dataset without outliers
+# Compute correlation coefficient
+cor(movie_2$Runtime_min, movie_2$Profit2)
 # graph
+grob <- grobTree(textGrob("Correlation Coefficient = 0.255", x=0.05,  y=0.90, hjust=0,
+                               gp=gpar(col="black", fontsize=12, fontface="italic")))
 ggplot(movie_2_no_outliers, aes(x=Runtime_min, y=Profit2))+
   geom_point(alpha=0.5)+
   geom_smooth(se=FALSE, color="#56B4E9", method=lm)+
   labs(x="Movie Run Time(min)", y="Profit")+
   ggtitle("Profit VS. Movie Run Time")+
-  theme(plot.title = element_text(hjust=0.5, face="bold"))
-# Compute correlation coefficient to comfirm result
-cor(movie_2$Runtime_min, movie_2$Profit2) # correlation coefficient
+  theme(plot.title = element_text(hjust=0.5, face="bold"))+
+  annotation_custom(grob)
 
 # Adj. Gross Revenue VS. Runtime_min
 # data cleaning
@@ -55,15 +65,18 @@ boxplot(movie_2_Revenue$Adjusted_Gross2, horizontal = TRUE) # use boxplot to und
 outliers_2 <- boxplot(movie_2_Revenue$Adjusted_Gross2, horizontal = TRUE)$out # identify outliers
 outliers_index_2 <- match(outliers_2, movie_2_Revenue$Adjusted_Gross2) # find index of outliers
 movie_2_no_outliers <- movie_2_Revenue[-outliers_index_2,] # re-create a movie dataset without outliers
+# Compute correlation coefficient
+cor(movie_2_Revenue$Runtime_min, movie_2_Revenue$Adjusted_Gross2)
 # graph
+grob <- grobTree(textGrob("Correlation Coefficient = 0.341", x=0.05,  y=0.90, hjust=0,
+                          gp=gpar(col="black", fontsize=12, fontface="italic")))
 ggplot(movie_2_no_outliers, aes(x=Runtime_min, y=Adjusted_Gross2))+
   geom_point(alpha=0.5)+
   geom_smooth(se=FALSE, color="#56B4E9", method=lm)+
   labs(x="Movie Run Time(min)", y="Adjusted Gross Revenue")+
   ggtitle("Adjusted Gross Revenue VS. Movie Run Time")+
-  theme(plot.title = element_text(hjust=0.5, face="bold"))
-# Compute correlation coefficient to comfirm result
-cor(movie_2_Revenue$Runtime_min, movie_2_Revenue$Adjusted_Gross2) # correlation coefficient
+  theme(plot.title = element_text(hjust=0.5, face="bold"))+
+  annotation_custom(grob)
 
 # Budget VS. Runtime_min
 # data cleaning
@@ -73,15 +86,18 @@ boxplot(movie_2_Budget$Budget2, horizontal = TRUE) # use boxplot to understand t
 outliers_2 <- boxplot(movie_2_Budget$Budget2, horizontal = TRUE)$out # identify outliers
 outliers_index_2 <- match(outliers_2, movie_2_Budget$Budget2) # find index of outliers
 movie_2_no_outliers <- movie_2_Budget[-outliers_index_2,] # re-create a movie dataset without outliers
+# Compute correlation coefficient
+cor(movie_2_Budget$Runtime_min, movie_2_Budget$Budget2)
 # graph
+grob <- grobTree(textGrob("Correlation Coefficient = 0.219", x=0.05,  y=0.90, hjust=0,
+                          gp=gpar(col="black", fontsize=12, fontface="italic")))
 ggplot(movie_2_no_outliers, aes(x=Runtime_min, y=Budget2))+
   geom_point(alpha=0.5)+
   geom_smooth(se=FALSE, color="#56B4E9", method=lm)+
   labs(x="Movie Run Time(min)", y="Budget")+
   ggtitle("Budget VS. Movie Run Time")+
-  theme(plot.title = element_text(hjust=0.5, face="bold"))
-# Compute correlation coefficient to comfirm result
-cor(movie_2_Budget$Runtime_min, movie_2_Budget$Budget2) # correlation coefficient
+  theme(plot.title = element_text(hjust=0.5, face="bold"))+
+  annotation_custom(grob)
 
 
 
@@ -96,14 +112,18 @@ boxplot(movie_3$Overseas_rev2, horizontal = TRUE) # use boxplot to understand th
 outliers_3_Overseas <- boxplot(movie_3$Overseas_rev2, horizontal = TRUE)$out # identify outliers
 outliers_index_3<- unique(c(match(outliers_3_UC, movie_3$US_rev2), match(outliers_3_Overseas, movie_3$Overseas_rev2))) # find index of outliers
 movie_3_no_outliers <- movie_3[-outliers_index_3,] # re-create a movie dataset without outliers
+# Compute correlation coefficient
+cor(movie_3$US_rev2, movie_3$Overseas_rev2)
 # graph
+grob <- grobTree(textGrob("Correlation Coefficient = 0.711", x=0.05,  y=0.90, hjust=0,
+                          gp=gpar(col="black", fontsize=12, fontface="italic")))
 ggplot(movie_3_no_outliers, aes(x=US_rev2, y=Overseas_rev2))+
   geom_point(alpha=0.5)+
   geom_smooth(se=FALSE, color="#56B4E9", method=lm)+
   labs(x="US Revenue", y="Overseas Revenue")+
   ggtitle("Overseas Revenue VS. US Revenue")+
-  theme(plot.title = element_text(hjust=0.5, face="bold"))
-# Compute correlation coefficient to comfirm result
-cor(movie_3$US_rev2, movie_3$Overseas_rev2) # correlation coefficient
+  theme(plot.title = element_text(hjust=0.5, face="bold"))+
+  annotation_custom(grob)
+
 
 
