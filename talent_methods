@@ -1,0 +1,4 @@
+ggplot(movie_1_, aes(x = IMDb_Rating, y = gross, color = Genre)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  facet_wrap(~Genre)
