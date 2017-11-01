@@ -32,9 +32,13 @@ ggplot(movie_1, aes(y=Adjusted_Gross2))+
   annotation_custom(grob_IMDb)+
   annotation_custom(grob_MovieLens)
 
-# distribution based on genre (log-transformed)
+# distribution based on genre
 # data cleaning
-movie_1 <- movie
+# select genre with number of datapoint >= 15
+Freq_genre <- as.data.frame(sort(table(movie$Genre),decreasing=TRUE))
+selected_genre <- as.character(Freq_genre[Freq_genre$Freq>=15,1])
+movieG <- movie[movie$Genre %in% selected_genre,]
+movie_1 <- movieG
 movie_1$Adjusted_Gross2 <- log10(as.numeric(gsub(",","",movie_1$Adjusted_Gross)))
 movie_1$MovieLens_Rating2 <- movie_1$MovieLens_Rating*2 # adjust MovieLens Rating to the same scale as IMDb's
 # graph
@@ -113,10 +117,14 @@ ggplot(movie_2_Budget, aes(x=Runtime_min, y=Budget2))+
   theme(plot.title = element_text(hjust=0.5, face="bold"))+
   annotation_custom(grob)
 
-# method - distribution based on genre (log-transformed)
+# distribution based on genre (log-transformed)
 # Profit VS. Runtime_min
 # data cleaning
-movie_2 <- movie
+# select genre with number of datapoint >= 15
+Freq_genre <- as.data.frame(sort(table(movie$Genre),decreasing=TRUE))
+selected_genre <- as.character(Freq_genre[Freq_genre$Freq>=15,1])
+movieG <- movie[movie$Genre %in% selected_genre,]
+movie_2 <- movieG
 movie_2$Profit2 <- log10(as.numeric(gsub(",","",movie_2$Profit)))
 # graph
 ggplot(movie_2, aes(x=Runtime_min, y=Profit2))+
@@ -130,10 +138,14 @@ ggplot(movie_2, aes(x=Runtime_min, y=Profit2))+
 genre_cor <- as.data.frame(movie_2 %>% group_by(Genre) %>% summarize(Cor.Coef = round(cor(Runtime_min, Profit2),3)))
 genre_cor <- genre_cor[order(genre_cor$Cor.Coef, decreasing = TRUE),]
 
-# method - boxplot
+# boxplot
 # Profit VS. Runtime_min
 # data cleaning
-movie_2 <- movie
+# select genre with number of datapoint >= 15
+Freq_genre <- as.data.frame(sort(table(movie$Genre),decreasing=TRUE))
+selected_genre <- as.character(Freq_genre[Freq_genre$Freq>=15,1])
+movieG <- movie[movie$Genre %in% selected_genre,]
+movie_2 <- movieG
 movie_2$Profit2 <- log10(as.numeric(gsub(",","",movie_2$Profit)))
 movie_2$Quantile <- "none"
 quan_25 <- round(quantile(movie_2$Runtime_min, 0.25))
@@ -175,7 +187,11 @@ ggplot(movie_3, aes(x=US_rev2, y=Overseas_rev2))+
 
 # distribution based on genre (log-transformed)
 # data cleaning
-movie_3 <- movie
+# select genre with number of datapoint >= 15
+Freq_genre <- as.data.frame(sort(table(movie$Genre),decreasing=TRUE))
+selected_genre <- as.character(Freq_genre[Freq_genre$Freq>=15,1])
+movieG <- movie[movie$Genre %in% selected_genre,]
+movie_3 <- movieG
 movie_3$US_rev2 <- as.numeric(gsub(",","",movie_3$US_rev))
 movie_3$Overseas_rev2 <- log10(as.numeric(gsub(",","",movie_3$Overseas_rev)))
 # graph
@@ -192,4 +208,52 @@ genre_cor <- genre_cor[order(genre_cor$Cor.Coef, decreasing = TRUE),]
 
 
 
+# Question 4
+# Profit VS. Ratings
+# data cleaning
+# select genre with number of datapoint >= 15
+Freq_genre <- as.data.frame(sort(table(movie$Genre),decreasing=TRUE))
+selected_genre <- as.character(Freq_genre[Freq_genre$Freq>=15,1])
+movieG <- movie[movie$Genre %in% selected_genre,]
+movie_1 <- movieG
+movie_1$Profit2 <- log10(as.numeric(gsub(",","",movie_1$Profit)))
+movie_1$MovieLens_Rating2 <- movie_1$MovieLens_Rating*2 # adjust MovieLens Rating to the same scale as IMDb's
+# Compute correlation coefficient
+correlation_coef_IMDb <- round(cor(as.numeric(movie_1$IMDb_Rating), movie_1$Profit2),3) # correlation coefficient of IMDb_Rating
+correlation_coef_MovieLens <- round(cor(as.numeric(movie_1$MovieLens_Rating), movie_1$Profit2),3) # correlation coefficient of MovieLens_Rating
+correlation_coef_I <- paste("Correlation Coefficient(IMDb) =", correlation_coef_IMDb)
+correlation_coef_M <- paste("Correlation Coefficient(MovieLens) =", correlation_coef_MovieLens)
+# graph
+grob_IMDb <- grobTree(textGrob(correlation_coef_I, x=0.05,  y=0.90, hjust=0,
+                               gp=gpar(col="#CC79A7", fontsize=12, fontface="italic")))
+grob_MovieLens <- grobTree(textGrob(correlation_coef_M, x=0.05,  y=0.85, hjust=0,
+                                    gp=gpar(col="#56B4E9", fontsize=12, fontface="italic")))
+ggplot(movie_1, aes(y=Profit2))+
+  geom_point(color="#CC79A7", aes(x=as.numeric(IMDb_Rating), shape="IMDb"))+
+  geom_smooth(se=FALSE, method=loess, color="#CC79A7", aes(x=as.numeric(IMDb_Rating)))+
+  geom_point(aes(x=as.numeric(MovieLens_Rating2), shape="MovieLens"), color="#56B4E9")+
+  geom_smooth(aes(x=as.numeric(MovieLens_Rating2)), se=FALSE, method=loess, color="#56B4E9")+
+  guides(shape=guide_legend("Rating Type", override.aes = list(color=c("#CC79A7", "#56B4E9"))))+
+  scale_x_continuous(breaks = c(1:10))+
+  labs(x="Rating", y="Profit (log transformed)")+
+  ggtitle("Profit VS. Rating")+
+  theme(plot.title = element_text(hjust=0.5, face="bold"))+
+  annotation_custom(grob_IMDb)+
+  annotation_custom(grob_MovieLens)
+# According to the graph, rating range from the 7.5 to 10 has the highest profit
 
+# select director with median rating from 7.5 to 10
+Med_rating_IMDb <- aggregate(IMDb_Rating~Director, movie_1, median)
+Med_rating_MovieLens <- aggregate(MovieLens_Rating2~Director, movie_1, median)
+Director_med_rating <- as.data.frame(cbind(Med_rating_IMDb,Med_rating_MovieLens)[,-3])
+Director_med_R <- cbind(Director_med_rating, mean_rating = (Director_med_rating$IMDb_Rating+Director_med_rating$MovieLens_Rating2)/2)
+Director_median_rating <- Director_med_R[order(Director_med_R$mean_rating, decreasing=TRUE),]
+selected_directors <- as.character(Director_median_rating$Director[Director_median_rating$mean_rating>=7.5 & Director_median_rating$mean_rating<=10])
+
+# select studio with median rating from 7.5 to 10
+Med_rating_IMDb <- aggregate(IMDb_Rating~Studio, movie_1, median)
+Med_rating_MovieLens <- aggregate(MovieLens_Rating2~Studio, movie_1, median)
+Studio_med_rating <- as.data.frame(cbind(Med_rating_IMDb,Med_rating_MovieLens)[,-3])
+Studio_med_R <- cbind(Studio_med_rating, mean_rating = (Studio_med_rating$IMDb_Rating+Studio_med_rating$MovieLens_Rating2)/2)
+Studio_median_rating <- Studio_med_R[order(Studio_med_R$mean_rating, decreasing=TRUE),]
+selected_studios <- as.character(Studio_median_rating$Studio[Studio_median_rating$mean_rating>=7.5 & Studio_median_rating$mean_rating<=10])
