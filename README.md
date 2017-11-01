@@ -15,5 +15,5 @@ Netflix’s CEO is impressed with your initial findings. Now he asked a few foll
 -	Shall we make a short movie or a long movie?
 -	If a movie does well in US, does it also usually do well overseas? 
 -	Now you have explored many variables and how they affect revenue, please recommend a strategy for Netflix’s next investment in a movie. 
-
+Mengyu
 	 
