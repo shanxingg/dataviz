@@ -145,7 +145,11 @@ movie_2$Quantile[movie_2$Runtime_min<=quan_50 & movie_2$Runtime_min>quan_25] <- 
 movie_2$Quantile[movie_2$Runtime_min<=quan_75 & movie_2$Runtime_min>quan_50] <- paste0(quan_50,"-",quan_75)
 movie_2$Quantile[movie_2$Runtime_min>quan_75] <- paste0(quan_75,"-",quan_100)
 ggplot(movie_2, aes(x=Quantile, y=Profit2))+
-  geom_boxplot()
+  geom_boxplot()+
+  facet_wrap( ~ Genre)+
+  labs(x="Movie Run Time(min)", y="Profit (log transformed)")+
+  ggtitle("Profit VS. Movie Run Time")+
+  theme(plot.title = element_text(hjust=0.5, face="bold"))
 
 
 
