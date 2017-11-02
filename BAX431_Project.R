@@ -45,15 +45,15 @@ movie_1$MovieLens_Rating2 <- movie_1$MovieLens_Rating*2 # adjust MovieLens Ratin
 movie_1$Profit_log <- log10(movie_1$Profit)
 movie_1$Profit_perc_log <- log10(movie_1$Profit_perc)
 #distribution: to campare median and mean
-qplot(data = movie_1, x = Adjusted_Gross)
-qplot(data = movie_1, x = Adjusted_Gross2)
+qplot(data = movie_1, x = Adjusted_Gross) + xlab("Ajusted Gross Revenue") + ylab("Number") + ggtitle("the Distribution of Adjusted Gross Revenue")
+qplot(data = movie_1, x = Adjusted_Gross2)+ xlab("Ajusted Gross Revenue(log transformed)") + ylab("Number") + ggtitle("the Distribution of Adjusted Gross Revenue(log transformed)")
 
 
-qplot(data = movie_1, x = Profit)
-qplot(data = movie_1, x = log10(Profit))
+qplot(data = movie_1, x = Profit)+ xlab("Profit") + ylab("Number") + ggtitle("the Distribution of Profit")
+qplot(data = movie_1, x = log10(Profit))+ xlab("Profit(log transformed)") + ylab("Number") + ggtitle("the Distribution of Profit(log transformed)")
 
-qplot(data = movie_1, x = Profit_perc)
-qplot(data = movie_1, x = log10(Profit_perc))
+qplot(data = movie_1, x = Profit_perc)+ xlab("Profit Percentage") + ylab("Number") + ggtitle("the Distribution of Profit Percentage")
+qplot(data = movie_1, x = log10(Profit_perc)) + xlab("Profit Percentage(log transformed)") + ylab("Number") + ggtitle("the Distribution of Profit Percentage(log transformed)")
 
 # Compute correlation coefficient
 correlation_coef_IMDb <- round(cor(as.numeric(movie_1$IMDb_Rating), movie_1$Adjusted_Gross2),3) # correlation coefficient of IMDb_Rating
