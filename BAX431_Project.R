@@ -6,7 +6,7 @@ movie <- read.csv("movie.csv")
 # Does higher rating movie also have a higher adjusted gross revenue?
 # method1 - remove outliers
 # data cleaning
-movie_1 <- movie
+movie_1 <- movie_1_
 movie_1$Adjusted_Gross2 <- as.numeric(gsub(",","",movie_1$Adjusted_Gross))
 movie_1$MovieLens_Rating2 <- movie_1$MovieLens_Rating*2 # adjust MovieLens Rating to the same scale as IMDb's
 boxplot(movie_1$Adjusted_Gross2, horizontal = TRUE) # use boxplot to understand the data
@@ -42,6 +42,19 @@ ggplot(movie_1_no_outliers, aes(y=Adjusted_Gross2))+
 movie_1 <- movie
 movie_1$Adjusted_Gross2 <- log10(as.numeric(gsub(",","",movie_1$Adjusted_Gross)))
 movie_1$MovieLens_Rating2 <- movie_1$MovieLens_Rating*2 # adjust MovieLens Rating to the same scale as IMDb's
+movie_1$Profit_log <- log10(movie_1$Profit)
+movie_1$Profit_perc_log <- log10(movie_1$Profit_perc)
+#distribution: to campare median and mean
+qplot(data = movie_1, x = Adjusted_Gross)
+qplot(data = movie_1, x = Adjusted_Gross2)
+
+
+qplot(data = movie_1, x = Profit)
+qplot(data = movie_1, x = log10(Profit))
+
+qplot(data = movie_1, x = Profit_perc)
+qplot(data = movie_1, x = log10(Profit_perc))
+
 # Compute correlation coefficient
 correlation_coef_IMDb <- round(cor(as.numeric(movie_1$IMDb_Rating), movie_1$Adjusted_Gross2),3) # correlation coefficient of IMDb_Rating
 correlation_coef_MovieLens <- round(cor(as.numeric(movie_1$MovieLens_Rating), movie_1$Adjusted_Gross2),3) # correlation coefficient of MovieLens_Rating
