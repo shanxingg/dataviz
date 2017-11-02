@@ -8,7 +8,15 @@ movie <- read.csv("movie.csv")
 # data cleaning
 movie_1 <- movie
 movie_1$Adjusted_Gross2 <- log10(as.numeric(gsub(",","",movie_1$Adjusted_Gross)))
+hist(as.numeric(movie_1$Adjusted_Gross))
+hist(movie_1$Adjusted_Gross2)
+ggplot(movie_1, aes(x = movie_1$Adjusted_Gross2)) + geom_histogram(binwidth = 10, color='Black') + ggtitle("Movies' Gross Revenue Distribution by Genre") + xlab('Adjusted Gross Revenue in million') 
+
 movie_1$MovieLens_Rating2 <- movie_1$MovieLens_Rating*2 # adjust MovieLens Rating to the same scale as IMDb's
+movie_1$IMDb_Rating2 <- as.numeric(movie_1$IMDb_Rating)
+hist(movie_1$MovieLens_Rating2)
+hist(movie_1$IMDb_Rating2)
+hist(as.numeric(movie_1$MovieLens_Rating))
 # Compute correlation coefficient
 correlation_coef_IMDb <- round(cor(as.numeric(movie_1$IMDb_Rating), movie_1$Adjusted_Gross2),3) # correlation coefficient of IMDb_Rating
 correlation_coef_MovieLens <- round(cor(as.numeric(movie_1$MovieLens_Rating), movie_1$Adjusted_Gross2),3) # correlation coefficient of MovieLens_Rating
@@ -162,7 +170,6 @@ ggplot(movie_2, aes(x=Quantile, y=Profit2))+
   labs(x="Movie Run Time(min)", y="Profit (log transformed)")+
   ggtitle("Profit VS. Movie Run Time")+
   theme(plot.title = element_text(hjust=0.5, face="bold"))
-
 
 
 # If a movie does well in US, does it also usually do well overseas?
