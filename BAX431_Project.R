@@ -3,7 +3,7 @@ library(grid)
 library(dplyr)
 movie <- read.csv("movie.csv")
 
-# Does higher rating movie also have a higher adjusted gross revenue?
+# Q1 - Does higher rating movie also have a higher adjusted gross revenue?
 # method - log-transform
 # data cleaning
 movie_1 <- movie
@@ -61,7 +61,7 @@ genre_cor <- genre_cor[order(genre_cor$mean_Cor.Coef, decreasing = TRUE),]
 
 
 
-# Shall we make a short movie or a long movie?
+# Q2 - Shall we make a short movie or a long movie?
 # method - log-transform
 # Profit VS. Runtime_min
 # data cleaning
@@ -117,6 +117,26 @@ ggplot(movie_2_Budget, aes(x=Runtime_min, y=Budget2))+
   theme(plot.title = element_text(hjust=0.5, face="bold"))+
   annotation_custom(grob)
 
+# boxplot
+# Profit VS. Runtime_min
+# data cleaning
+movie_2 <- movie
+movie_2$Profit2 <- log10(as.numeric(gsub(",","",movie_2$Profit)))
+movie_2$Quantile <- "none"
+quan_25 <- round(quantile(movie_2$Runtime_min, 0.25))
+quan_50 <- round(quantile(movie_2$Runtime_min, 0.50))
+quan_75 <- round(quantile(movie_2$Runtime_min, 0.75))
+quan_100 <- quantile(movie_2$Runtime_min, 1)
+movie_2$Quantile[movie_2$Runtime_min<=quan_25] <- paste0("0-",quan_25)
+movie_2$Quantile[movie_2$Runtime_min<=quan_50 & movie_2$Runtime_min>quan_25] <- paste0(quan_25,"-",quan_50)
+movie_2$Quantile[movie_2$Runtime_min<=quan_75 & movie_2$Runtime_min>quan_50] <- paste0(quan_50,"-",quan_75)
+movie_2$Quantile[movie_2$Runtime_min>quan_75] <- paste0(quan_75,"-",quan_100)
+ggplot(movie_2, aes(x=Quantile, y=Profit2))+
+  geom_boxplot()+
+  labs(x="Movie Run Time(min)", y="Profit (log transformed)")+
+  ggtitle("Profit VS. Movie Run Time")+
+  theme(plot.title = element_text(hjust=0.5, face="bold"))
+
 # distribution based on genre (log-transformed)
 # Profit VS. Runtime_min
 # data cleaning
@@ -165,7 +185,7 @@ ggplot(movie_2, aes(x=Quantile, y=Profit2))+
 
 
 
-# If a movie does well in US, does it also usually do well overseas?
+# Q3 - If a movie does well in US, does it also usually do well overseas?
 # method - log-transform
 # data cleaning
 movie_3 <- movie
@@ -208,52 +228,81 @@ genre_cor <- genre_cor[order(genre_cor$Cor.Coef, decreasing = TRUE),]
 
 
 
-# Question 4
-# Profit VS. Ratings
-# data cleaning
+# Q4 - recommendation
+# Profit VS. Budget 
+movie4 <- movie
+movie4$Profit2 <- log10(as.numeric(gsub(",","",movie4$Profit)))
+movie4$Budget2 <- log10(as.numeric(gsub(",","",movie4$Budget)))
+ggplot(movie4, aes(x=Budget2, y=Profit2))+
+  geom_point(alpha=0.5)+
+  labs(x="Budget (log transformed)", y="Profit (log transformed)")+
+  xlim(0.5,2.5)+
+  ggtitle("Profit VS. Budget")+
+  theme(plot.title = element_text(hjust=0.5, face="bold"))
+
+# Genres
 # select genre with number of datapoint >= 15
 Freq_genre <- as.data.frame(sort(table(movie$Genre),decreasing=TRUE))
 selected_genre <- as.character(Freq_genre[Freq_genre$Freq>=15,1])
 movieG <- movie[movie$Genre %in% selected_genre,]
-movie_1 <- movieG
-movie_1$Profit2 <- log10(as.numeric(gsub(",","",movie_1$Profit)))
-movie_1$MovieLens_Rating2 <- movie_1$MovieLens_Rating*2 # adjust MovieLens Rating to the same scale as IMDb's
-# Compute correlation coefficient
-correlation_coef_IMDb <- round(cor(as.numeric(movie_1$IMDb_Rating), movie_1$Profit2),3) # correlation coefficient of IMDb_Rating
-correlation_coef_MovieLens <- round(cor(as.numeric(movie_1$MovieLens_Rating), movie_1$Profit2),3) # correlation coefficient of MovieLens_Rating
-correlation_coef_I <- paste("Correlation Coefficient(IMDb) =", correlation_coef_IMDb)
-correlation_coef_M <- paste("Correlation Coefficient(MovieLens) =", correlation_coef_MovieLens)
+movie4 <- movieG
+movie4$Profit2 <- log10(as.numeric(gsub(",","",movie4$Profit)))
+movie4$Profit_perc2 <- log10(as.numeric(gsub(",","",movie4$Profit_perc)))
+# aggregate genre
+Profit_G <- aggregate(Profit2~Genre, movie4, mean)
+ProfitPerc_G <- aggregate(Profit_perc2~Genre, movie4, mean)
+Genre_compare <- cbind(Profit_G,ProfitPerc_G)[,-3]
 # graph
-grob_IMDb <- grobTree(textGrob(correlation_coef_I, x=0.05,  y=0.90, hjust=0,
-                               gp=gpar(col="#CC79A7", fontsize=12, fontface="italic")))
-grob_MovieLens <- grobTree(textGrob(correlation_coef_M, x=0.05,  y=0.85, hjust=0,
-                                    gp=gpar(col="#56B4E9", fontsize=12, fontface="italic")))
-ggplot(movie_1, aes(y=Profit2))+
-  geom_point(color="#CC79A7", aes(x=as.numeric(IMDb_Rating), shape="IMDb"))+
-  geom_smooth(se=FALSE, method=loess, color="#CC79A7", aes(x=as.numeric(IMDb_Rating)))+
-  geom_point(aes(x=as.numeric(MovieLens_Rating2), shape="MovieLens"), color="#56B4E9")+
-  geom_smooth(aes(x=as.numeric(MovieLens_Rating2)), se=FALSE, method=loess, color="#56B4E9")+
-  guides(shape=guide_legend("Rating Type", override.aes = list(color=c("#CC79A7", "#56B4E9"))))+
-  scale_x_continuous(breaks = c(1:10))+
-  labs(x="Rating", y="Profit (log transformed)")+
-  ggtitle("Profit VS. Rating")+
+ggplot(Genre_compare, aes(x=Profit2, y=Profit_perc2, color=Genre))+
+  geom_point(size=6)+
+  xlim(2.3,2.6)+
+  ylim(2.4,2.9)+
+  labs(x="Avg. Profit (log transformed)", y="Avg. Profit Percentage (log transformed)")+
+  ggtitle("Avg. Profit Percentage VS. Avg. Profit on Genres")+
   theme(plot.title = element_text(hjust=0.5, face="bold"))+
-  annotation_custom(grob_IMDb)+
-  annotation_custom(grob_MovieLens)
-# According to the graph, rating range from the 7.5 to 10 has the highest profit
+  geom_text(label = Genre_compare$Genre, vjust=-1, size=5)+
+  guides(color=guide_legend("none"))
 
-# select director with median rating from 7.5 to 10
-Med_rating_IMDb <- aggregate(IMDb_Rating~Director, movie_1, median)
-Med_rating_MovieLens <- aggregate(MovieLens_Rating2~Director, movie_1, median)
-Director_med_rating <- as.data.frame(cbind(Med_rating_IMDb,Med_rating_MovieLens)[,-3])
-Director_med_R <- cbind(Director_med_rating, mean_rating = (Director_med_rating$IMDb_Rating+Director_med_rating$MovieLens_Rating2)/2)
-Director_median_rating <- Director_med_R[order(Director_med_R$mean_rating, decreasing=TRUE),]
-selected_directors <- as.character(Director_median_rating$Director[Director_median_rating$mean_rating>=7.5 & Director_median_rating$mean_rating<=10])
+# Studio
+# select genre with number of datapoint >= 15
+Freq_genre <- as.data.frame(sort(table(movie$Genre),decreasing=TRUE))
+selected_genre <- as.character(Freq_genre[Freq_genre$Freq>=15,1])
+movieG <- movie[movie$Genre %in% selected_genre,]
+movie4 <- movieG
+movie4$Profit2 <- log10(as.numeric(gsub(",","",movie4$Profit)))
+movie4$Profit_perc2 <- log10(as.numeric(gsub(",","",movie4$Profit_perc)))
+# aggregate genre
+Profit_S <- aggregate(Profit2~Studio, movie4, mean)
+ProfitPerc_S <- aggregate(Profit_perc2~Studio, movie4, mean)
+Studio_compare <- cbind(Profit_S,ProfitPerc_S)[,-3]
+# graph
+ggplot(Studio_compare, aes(x=Profit2, y=Profit_perc2, color=Studio))+
+  geom_point()+
+  labs(x="Avg. Profit (log transformed)", y="Avg. Profit Percentage (log transformed)")+
+  ggtitle("Avg. Profit Percentage VS. Avg. Profit on Studios")+
+  xlim(2.1,2.9)+
+  theme(plot.title = element_text(hjust=0.5, face="bold"))+
+  geom_text(label = Studio_compare$Studio, vjust=-0.5)+
+  guides(color=guide_legend("none"))
 
-# select studio with median rating from 7.5 to 10
-Med_rating_IMDb <- aggregate(IMDb_Rating~Studio, movie_1, median)
-Med_rating_MovieLens <- aggregate(MovieLens_Rating2~Studio, movie_1, median)
-Studio_med_rating <- as.data.frame(cbind(Med_rating_IMDb,Med_rating_MovieLens)[,-3])
-Studio_med_R <- cbind(Studio_med_rating, mean_rating = (Studio_med_rating$IMDb_Rating+Studio_med_rating$MovieLens_Rating2)/2)
-Studio_median_rating <- Studio_med_R[order(Studio_med_R$mean_rating, decreasing=TRUE),]
-selected_studios <- as.character(Studio_median_rating$Studio[Studio_median_rating$mean_rating>=7.5 & Studio_median_rating$mean_rating<=10])
+# Director
+# select genre with number of datapoint >= 15
+Freq_genre <- as.data.frame(sort(table(movie$Genre),decreasing=TRUE))
+selected_genre <- as.character(Freq_genre[Freq_genre$Freq>=15,1])
+movieG <- movie[movie$Genre %in% selected_genre,]
+movie4 <- movieG
+movie4$Profit2 <- log10(as.numeric(gsub(",","",movie4$Profit)))
+movie4$Profit_perc2 <- log10(as.numeric(gsub(",","",movie4$Profit_perc)))
+# aggregate genre
+Profit_D <- aggregate(Profit2~Director, movie4, mean)
+ProfitPerc_D <- aggregate(Profit_perc2~Director, movie4, mean)
+Director_compare <- cbind(Profit_D,ProfitPerc_D)[,-3]
+# graph
+ggplot(Director_compare, aes(x=Profit2, y=Profit_perc2, color=Director))+
+  geom_point()+
+  labs(x="Avg. Profit (log transformed)", y="Avg. Profit Percentage (log transformed)")+
+  ggtitle("Avg. Profit Percentage VS. Avg. Profit on Directors")+
+  theme(plot.title = element_text(hjust=0.5, face="bold"))+
+  geom_text(label = Director_compare$Director, vjust=-0.5, size=3)+
+  guides(color=guide_legend("none"))
+
