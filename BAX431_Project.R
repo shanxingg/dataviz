@@ -183,6 +183,31 @@ ggplot(movie_2, aes(x=Quantile, y=Profit2))+
   ggtitle("Profit VS. Movie Run Time")+
   theme(plot.title = element_text(hjust=0.5, face="bold"))
 
+# boxplot2
+# Profit Percentage VS. Runtime_min
+# data cleaning
+# select genre with number of datapoint >= 15
+Freq_genre <- as.data.frame(sort(table(movie$Genre),decreasing=TRUE))
+selected_genre <- as.character(Freq_genre[Freq_genre$Freq>=15,1])
+movieG <- movie[movie$Genre %in% selected_genre,]
+movie_2 <- movieG
+movie_2$Profit_perc2 <- log10(as.numeric(gsub(",","",movie_2$Profit_perc)))
+movie_2$Quantile <- "none"
+quan_25 <- round(quantile(movie_2$Runtime_min, 0.25))
+quan_50 <- round(quantile(movie_2$Runtime_min, 0.50))
+quan_75 <- round(quantile(movie_2$Runtime_min, 0.75))
+quan_100 <- quantile(movie_2$Runtime_min, 1)
+movie_2$Quantile[movie_2$Runtime_min<=quan_25] <- paste0("0-",quan_25)
+movie_2$Quantile[movie_2$Runtime_min<=quan_50 & movie_2$Runtime_min>quan_25] <- paste0(quan_25,"-",quan_50)
+movie_2$Quantile[movie_2$Runtime_min<=quan_75 & movie_2$Runtime_min>quan_50] <- paste0(quan_50,"-",quan_75)
+movie_2$Quantile[movie_2$Runtime_min>quan_75] <- paste0(quan_75,"-",quan_100)
+ggplot(movie_2, aes(x=Quantile, y=Profit_perc2))+
+  geom_boxplot()+
+  facet_wrap( ~ Genre)+
+  labs(x="Movie Run Time(min)", y="Profit Percentage (log transformed)")+
+  ggtitle("Profit Percentage VS. Movie Run Time")+
+  theme(plot.title = element_text(hjust=0.5, face="bold"))
+
 
 
 # Q3 - If a movie does well in US, does it also usually do well overseas?
