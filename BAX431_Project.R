@@ -164,6 +164,24 @@ ggplot(movie_2, aes(x=Quantile, y=Profit2))+
   theme(plot.title = element_text(hjust=0.5, face="bold"))
 
 
+##Adding polynoial graph-Neha
+p <-ggplot(movie, aes(movie$Runtime_min, movie$Profit))
+p <- p + geom_point(alpha=2/10, shape=21, fill="blue", colour="black", size=5) + xlab("Runtime") + ylab("Profit")
+p<- p + geom_smooth(method="loess",se=TRUE)
+p <- p + stat_smooth(method="lm", se=TRUE, fill=NA,
+                formula=y ~ poly(x, 3, raw=TRUE),colour="green")
+m=lm(movie$Profit ~ poly(movie$Runtime_min, 3), movie)#3rd degree polynomial
+rsquare = function(movie){
+  
+  eq <- substitute(italic(r)^2~"="~r2,
+                   list(r2 = format(summary(m)$r.squared, digits = 3)))
+  as.character(as.expression(eq))
+}
+
+
+p + annotate("text", x=60, y=2000, label=rsquare(movie), hjust=0, size=4, 
+             family="Times", parse=TRUE)
+
 
 # If a movie does well in US, does it also usually do well overseas?
 # method - log-transform
