@@ -66,6 +66,18 @@ genre_cor <- cbind(as.data.frame(movie_1 %>% group_by(Genre) %>% summarize(IMDb_
                    as.data.frame(movie_1 %>% group_by(Genre) %>% summarize(MovieLens_Cor.Coef = round(cor(MovieLens_Rating, Adjusted_Gross2),3))))[,-3]
 genre_cor <- cbind(genre_cor, mean_Cor.Coef = (genre_cor$IMDb_Cor.Coef+genre_cor$MovieLens_Cor.Coef)/2)
 genre_cor <- genre_cor[order(genre_cor$mean_Cor.Coef, decreasing = TRUE),]
+movie_1$Profit2 <- as.numeric(movie_1$Profit)
+movie_1$Profit_perc2 <- as.numeric(movie_1$Profit_perc)
+genre_cor1 <- cbind(as.data.frame(movie_1 %>% group_by(Genre) %>% summarize(IMDb_Cor.Coef = round(cor(IMDb_Rating, Profit2),3))),
+                    as.data.frame(movie_1 %>% group_by(Genre) %>% summarize(MovieLens_Cor.Coef = round(cor(MovieLens_Rating, Profit2),3))))[,-3]
+genre_cor1 <- cbind(genre_cor1, mean_Cor.Coef = (genre_cor1$IMDb_Cor.Coef+genre_cor1$MovieLens_Cor.Coef)/2)
+genre_cor1 <- genre_cor1[order(genre_cor1$mean_Cor.Coef, decreasing = TRUE),]
+genre_cor1
+genre_cor2 <- cbind(as.data.frame(movie_1 %>% group_by(Genre) %>% summarize(IMDb_Cor.Coef = round(cor(IMDb_Rating, Profit_perc2),3))),
+                    as.data.frame(movie_1 %>% group_by(Genre) %>% summarize(MovieLens_Cor.Coef = round(cor(MovieLens_Rating, Profit_perc2),3))))[,-3]
+genre_cor2 <- cbind(genre_cor2, mean_Cor.Coef = (genre_cor2$IMDb_Cor.Coef+genre_cor2$MovieLens_Cor.Coef)/2)
+genre_cor2 <- genre_cor2[order(genre_cor2$mean_Cor.Coef, decreasing = TRUE),]
+genre_cor2
 
 
 
