@@ -5,8 +5,11 @@ Assignment (20’)
 -	Github (final codes) – due Nov 2
 -	Report – due Nov 2
 -	Presentation at next class
-o	Think about who, what, and how
-o	Think about your storyline
+
+    -Think about who, what, and how
+  
+    -Think about your storyline
+  
 -	Grade will be given after next class
 
 Netflix’s CEO is impressed with your initial findings. Now he asked a few follow-up questions
