@@ -1,4 +1,4 @@
-# dataviz_project
+# Netflix Movie Analysis (ggolot2 Visualization Project)
 
 This project is intended to get us understand and answer the following questions:
 -	Does higher rating movie also have a higher adjusted gross revenue?
